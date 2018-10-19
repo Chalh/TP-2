@@ -35,7 +35,7 @@ for fichier in os.listdir(rep_pos):
 
         for t in tokens:
             print rep_pos+fichier
-            print xyz
+            print abc
             print(ps.stem(t))
 
 print nb_fichier
