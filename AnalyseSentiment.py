@@ -49,11 +49,33 @@ classifier = NaiveBayesClassifier.train(Liste_fich_negatif)
 index_debut_test = 1
 index_fin_test = 100
 
+#Entrainement NaiveBayes
+
+def get_words_in_tweets(tweets):
+
+    all_words = []
+
+    for (words, sentiment) in tweets:
+
+      all_words.extend(words)
+
+    return all_words
+
+def get_word_features(wordlist):
+
+    wordlist = nltk.FreqDist(wordlist)
+
+    word_features = wordlist.keys()
+
+    return word_features
+def word_feats(words):
+    return dict([(word, True) for word in words])
+
 while(index_fin_test<1001):
     for i in range(1,index_debut_test) + range (index_fin_test,1001):
-        nb_fichier = nb_fichier+1
+        continue
 
-    print index_debut_test.__str__() + ":" + index_fin_test.__str__()+ ":" +nb_fichier.__str__()
+#    print index_debut_test.__str__() + ":" + index_fin_test.__str__()+ ":" +nb_fichier.__str__()
     nb_fichier = 0
     index_debut_test = index_debut_test + 100
     index_fin_test = index_fin_test + 100
