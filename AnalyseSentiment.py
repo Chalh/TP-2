@@ -16,6 +16,8 @@ from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 import os
 from nltk.stem import WordNetLemmatizer
+import nltk.classify.util
+from nltk.classify import NaiveBayesClassifier
 
 import sys
 reload(sys)
@@ -30,6 +32,32 @@ ps = PorterStemmer()
 stop_words = set(stopwords.words('english'))
 
 nb_fichier =0
+
+# Récuperation de la liste des fichier
+Liste_fich_positif = [(f, 'pos') for f in os.listdir(rep_pos)]
+
+Liste_fich_negatif = [(f, 'neg') for f in os.listdir(rep_neg)]
+
+
+
+classifier = NaiveBayesClassifier.train(Liste_fich_negatif)
+# ######################################################################################################################
+#   Entrainement 90%du corpus, Test 10% du corpus                                                                                                                   #
+#
+########################################################################################################################
+
+index_debut_test = 1
+index_fin_test = 100
+
+while(index_fin_test<1001):
+    for i in range(1,index_debut_test) + range (index_fin_test,1001):
+        nb_fichier = nb_fichier+1
+
+    print index_debut_test.__str__() + ":" + index_fin_test.__str__()+ ":" +nb_fichier.__str__()
+    nb_fichier = 0
+    index_debut_test = index_debut_test + 100
+    index_fin_test = index_fin_test + 100
+
 for fichier in os.listdir(rep_pos):
     if fichier.endswith(".text"):
         f = open(rep_pos+fichier,"r")
