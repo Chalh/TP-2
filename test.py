@@ -4,7 +4,8 @@ from nltk.corpus import movie_reviews
 
 
 def word_feats(words):
-    return dict([(word, True) for word in words])
+    gdfgd = dict([(word, True) for word in words])
+    return gdfgd
 
 
 negids = movie_reviews.fileids('neg')
