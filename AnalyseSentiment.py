@@ -10,6 +10,7 @@
 
 import nltk
 from nltk.corpus import stopwords
+from nltk.corpus import sentiwordnet as swn
 from nltk.corpus import wordnet as wn
 from nltk.probability import *
 from nltk.stem import PorterStemmer
@@ -23,56 +24,44 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 #nltk.download('averaged_perceptron_tagger')
+#nltk.download('sentiwordnet')
 
 rep_pos = "Book/pos_Bk/"
 rep_neg = "Book/neg_Bk/"
-
+breakdown = swn.senti_synset('breakdown.n.03')
 ps = PorterStemmer()
 # préparation de la liste stop_words
 stop_words = set(stopwords.words('english'))
 wordnet_lemmatizer = WordNetLemmatizer()
+
 nb_fichier =0
 
 def Attributs_mots(texte):
-    tokens = word_tokenize(texte)
-    freq_texte = FreqDist(tokens)
-    texte_filtred = []
-    for t in tokens:
-
-        if (freq_texte[t] > 1) and (not t in stop_words):
-            try:
-                                # Normalisation des mots
-                w = wordnet_lemmatizer.lemmatize(ps.stem(t))
-            except ValueError:
-                w=t
-
-            texte_filtred.append((t, freq_texte[t],w))
-
-    return texte_filtred
-
-
-def Attributs_mots2(texte):
     attribut = {}
+    type_a_considere = ["NN" , "VB" , "JJ" , "AD"]
     tokens = word_tokenize(texte)
-    txt_pos_tag=nltk.pos_tag(tokens)
     freq_texte = FreqDist(tokens)
     texte_normalise=[]
+    texte_frequent =[]
     for t in tokens:
         # Normalisation des mots
         if (freq_texte[t] > 1) and (not t in stop_words):
-            try:
-                w = wordnet_lemmatizer.lemmatize(ps.stem(t))
-            except ValueError:
-                w=t
-            texte_normalise.append(w)
+        #if not t in stop_words:
+            texte_frequent.append(t)
 
+    txt_pos_tag=nltk.pos_tag(texte_frequent)
+    freq_texte_frequent = FreqDist(texte_frequent)
 
-    freq_texte_norm = FreqDist(texte_normalise)
+    for bgr in txt_pos_tag:
+        if any(x in bgr[1] for x in type_a_considere):
+                    try:
+                        w = wordnet_lemmatizer.lemmatize(ps.stem(bgr[0]))
+                    except ValueError:
+                        w=bgr[0]
 
-    attribut["mot"] = w
+                    attribut["count({})".format(bgr[0])] = freq_texte_frequent[bgr[0]]
 
-
-    return texte_filtred
+    return attribut
 
 
 # Récuperation de la liste des fichier
@@ -80,9 +69,29 @@ Liste_fich_positif = [rep_pos+f for f in os.listdir(rep_pos)]
 
 Liste_fich_negatif = [rep_neg+f for f in os.listdir(rep_neg)]
 
-#negfeats = [(word_feats(open(rep_pos+f,"r").read()), 'neg') for f in os.listdir(rep_pos)]
 
-#classifier = NaiveBayesClassifier.train(negfeats)
+listetrainpos = Liste_fich_positif[:950]
+listetrainneg = Liste_fich_negatif[:950]
+
+#listetrainpos = Liste_fich_positif[:50]
+#listetrainneg = Liste_fich_negatif[:50]
+
+
+listetestpos = Liste_fich_positif[951:]
+listetestneg = Liste_fich_negatif[951:]
+
+
+testneg = [Attributs_mots (open(f,"r").read()) for f in listetestneg]
+testpos = [Attributs_mots (open(f,"r").read()) for f in listetestpos]
+
+testset = testneg+testpos
+
+testnegm = [(Attributs_mots (open(f,"r").read()),"neg") for f in listetestneg]
+testposm = [(Attributs_mots (open(f,"r").read()),"pos") for f in listetestpos]
+
+testsetm = testnegm+testposm
+
+
 # ######################################################################################################################
 #   Entrainement 90%du corpus, Test 10% du corpus                                                                                                                   #
 #
@@ -93,41 +102,30 @@ index_fin_test = 100
 
 
 #Entrainement NaiveBayes
-#posfeats = [((Attributs_mots (f.read())), 'neg') for f in Liste_fich_positif]
-#negfeats = [((Attributs_mots (f.read())), 'neg') for f in Liste_fich_negatif]
-
-posfeats = []
-for fichier in Liste_fich_positif:
+trainpos = []
+for fichier in listetrainpos:
    f = open(fichier,"r")
-   posfeats.append((Attributs_mots2 (f.read()),"pos"))
+   try:
+       trainpos.append((Attributs_mots (f.read()),"pos"))
+   except ValueError:
+       continue
 
-trainpos = posfeats[:950]
-testpos = posfeats[951:]
+trainneg = []
+for fichier in listetrainneg:
+   f = open(fichier,"r")
+   try:
+       trainneg.append((Attributs_mots (f.read()),"neg"))
+   except ValueError:
+       continue
 
-#classifier = NaiveBayesClassifier.train(trainpos)
-##print 'accuracy:', nltk.classify.util.accuracy(classifier, testpos)
-#classifier.show_most_informative_features()
 
-while(index_fin_test<1001):
-    for i in range(1,index_debut_test) + range (index_fin_test,1001):
-        continue
+trainset = trainneg+trainpos
 
-#    print index_debut_test.__str__() + ":" + index_fin_test.__str__()+ ":" +nb_fichier.__str__()
-    nb_fichier = 0
-    index_debut_test = index_debut_test + 100
-    index_fin_test = index_fin_test + 100
+classifier = NaiveBayesClassifier.train(trainset)
 
-for fichier in os.listdir(rep_pos):
-    if fichier.endswith(".text"):
-        f = open(rep_pos+fichier,"r")
-        xyz=Attributs_mots2 (f.read())
+print nltk.classify.util.accuracy(classifier, testsetm)
+classifier.show_most_informative_features()
 
-print nb_fichier
-#nltk.download('wordnet')
-
-#abc = wn.synset('dog.n.1')
-
-#print abc.definition()
 
 
 
