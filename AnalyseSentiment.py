@@ -29,7 +29,7 @@ sys.setdefaultencoding('utf8')
 
 rep_pos = "Book/pos_Bk/"
 rep_neg = "Book/neg_Bk/"
-breakdown = swn.senti_synset('breakdown.n.03')
+
 ps = PorterStemmer()
 # préparation de la liste stop_words
 stop_words = set(stopwords.words('english'))
