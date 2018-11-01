@@ -19,6 +19,7 @@ import os
 from nltk.stem import WordNetLemmatizer
 import nltk.classify.util
 from nltk.classify import NaiveBayesClassifier
+from nltk.classify import MaxentClassifier
 
 import sys
 reload(sys)
@@ -39,6 +40,7 @@ nb_fichier =0
 def Attributs_mots(texte):
     attribut = {}
     type_a_considere = ["NN" , "VB" , "JJ" , "AD"]
+    type_sentiword = {"NN":"n" , "VB":"v" , "JJ":"a" , "AD":"r"}
     tokens = word_tokenize(texte)
     freq_texte = FreqDist(tokens)
     texte_normalise=[]
@@ -51,16 +53,26 @@ def Attributs_mots(texte):
 
     txt_pos_tag=nltk.pos_tag(texte_frequent)
     freq_texte_frequent = FreqDist(texte_frequent)
-
+    nb_mot_positif = 0
     for bgr in txt_pos_tag:
-        if any(x in bgr[1] for x in type_a_considere):
+        for x in type_a_considere:
+            if x in bgr[1]:
+                type_sw = type_sentiword[x]
+
+                try:
+                    w = wordnet_lemmatizer.lemmatize(ps.stem(bgr[0]))
                     try:
-                        w = wordnet_lemmatizer.lemmatize(ps.stem(bgr[0]))
-                    except ValueError:
-                        w=bgr[0]
+                        senti_result = swn.senti_synset(bgr[0] + "." + type_sw + ".01")
+                        if senti_result.pos_score() > senti_result.neg_score():
+                            nb_mot_positif += 1
+                    except:
+                        pass
+                except :
+                    w=bgr[0]
 
-                    attribut["count({})".format(bgr[0])] = freq_texte_frequent[bgr[0]]
-
+                attribut["count({})".format(w)] = freq_texte_frequent[bgr[0]]
+                break
+    attribut["nb_mot_positif"] = nb_mot_positif
     return attribut
 
 
@@ -69,17 +81,24 @@ Liste_fich_positif = [rep_pos+f for f in os.listdir(rep_pos)]
 
 Liste_fich_negatif = [rep_neg+f for f in os.listdir(rep_neg)]
 
-
-listetrainpos = Liste_fich_positif[:950]
-listetrainneg = Liste_fich_negatif[:950]
-
+#50 articles train 10 articles test
 #listetrainpos = Liste_fich_positif[:50]
 #listetrainneg = Liste_fich_negatif[:50]
+#listetestpos = Liste_fich_positif[991:]
+#listetestneg = Liste_fich_negatif[991:]
 
-
+#90% train 10% test
+listetrainpos = Liste_fich_positif[:950]
+listetrainneg = Liste_fich_negatif[:950]
 listetestpos = Liste_fich_positif[951:]
 listetestneg = Liste_fich_negatif[951:]
 
+
+#10% test 90% train
+#listetrainpos = Liste_fich_positif[51:]
+#listetrainneg = Liste_fich_negatif[51:]
+#listetestpos = Liste_fich_positif[:50]
+#listetestneg = Liste_fich_negatif[:50]
 
 testneg = [Attributs_mots (open(f,"r").read()) for f in listetestneg]
 testpos = [Attributs_mots (open(f,"r").read()) for f in listetestpos]
@@ -126,6 +145,10 @@ classifier = NaiveBayesClassifier.train(trainset)
 print nltk.classify.util.accuracy(classifier, testsetm)
 classifier.show_most_informative_features()
 
+classifier = MaxentClassifier.train(trainset)
+
+print nltk.classify.util.accuracy(classifier, testsetm)
+classifier.show_most_informative_features()
 
 
 

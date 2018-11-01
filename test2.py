@@ -49,4 +49,4 @@ train_set, test_set = featuresets[500:], featuresets[:500]
 classifier = nltk.NaiveBayesClassifier.train(train_set)
 
 
-print(classifier.classify(gender_features('Neo')))
+print(classifier.classify(gender_features2('Neo')))
