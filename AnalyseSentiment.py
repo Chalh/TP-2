@@ -29,7 +29,6 @@ sys.setdefaultencoding('utf8')
 
 rep_pos = "Book/pos_Bk/"
 rep_neg = "Book/neg_Bk/"
-
 ps = PorterStemmer()
 # préparation de la liste stop_words
 stop_words = set(stopwords.words('english'))
