@@ -11,12 +11,14 @@ import nltk
 from nltk.probability import *
 from nltk.classify import NaiveBayesClassifier
 from nltk.classify import MaxentClassifier
-import operator
+import re
 import os
 
 import sys
+
 reload(sys)
 sys.setdefaultencoding('utf8')
+
 
 
 #Lecture du contenu du fichier d'entrainement
@@ -39,7 +41,7 @@ def Attributs_phrase(phrase,nbgrm):
     freq_dist_ngram = FreqDist(ngram_train)
 
     for t in ngram_train:
-        attribut["count({})".format(t)] = freq_dist_ngram[t
+        attribut["count({})".format(t)] = freq_dist_ngram[t]
 
     return attribut
 
@@ -48,7 +50,24 @@ def Reconnaitre_langue(fichier, classificateur):
 
     count_langue = {"eng":0,"esp":0,"fr":0, "port":0}
     f = open(fichier, 'rb')
-    testset = [Attributs_phrase(ligne, 3) for ligne in f]
+
+    p1 = re.compile(r"\b((?!\.).)+(.)\b")
+    testset=[]
+    lignes = f.readlines()
+    for ligne in lignes:
+        if ligne is not None:
+            if "test20.txt" in fichier:
+                f.readlines()
+                m1 = p1.split(ligne)
+                print "-------------------------"
+                if m1 is not None:
+                    print m1.string
+                print "-------------------------"
+            else:
+                if ligne is not "\n":
+                    testset.append(Attributs_phrase(ligne, 3))
+
+       # testset = [Attributs_phrase(ligne, 3) for ligne in f]
 
     for atrb in testset:
         resultat = classificateur.classify(atrb)
@@ -65,19 +84,19 @@ def Reconnaitre_langue(fichier, classificateur):
 file = open('identification_langue/corpus_entrainement/english-training.txt', 'rb')
 
 train_english = [(Attributs_phrase (ligne,3),"eng") for ligne in file]
+file.close()
 
 file = open('identification_langue/corpus_entrainement/espanol-training.txt', 'rb')
-
 train_espagnol = [(Attributs_phrase (ligne,3),"esp") for ligne in file]
+file.close()
 
 file = open('identification_langue/corpus_entrainement/french-training.txt', 'rb')
-
 train_english = [(Attributs_phrase (ligne,3),"fr") for ligne in file]
+file.close()
 
 file = open('identification_langue/corpus_entrainement/portuguese-training.txt', 'rb')
-
 train_espagnol = [(Attributs_phrase (ligne,3),"port") for ligne in file]
-
+file.close()
 
 
 trainset = train_english + train_espagnol
