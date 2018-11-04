@@ -55,15 +55,15 @@ def Reconnaitre_langue(fichier, classificateur):
     testset=[]
     lignes = f.readlines()
     for ligne in lignes:
-        if ligne is not None:
-            if "test20.txt" in fichier:
-                f.readlines()
-                m1 = p1.split(ligne)
-                print "-------------------------"
-                if m1 is not None:
-                    print m1.string
-                print "-------------------------"
-            else:
+#        if ligne is not None:
+#            if "test20.txt" in fichier:
+#                f.readlines()
+#                m1 = p1.split(ligne)
+#                print "-------------------------"
+#                if m1 is not None:
+#                    print m1.string
+#                print "-------------------------"
+#            else:
                 if ligne is not "\n":
                     testset.append(Attributs_phrase(ligne, 3))
 
@@ -91,15 +91,15 @@ train_espagnol = [(Attributs_phrase (ligne,3),"esp") for ligne in file]
 file.close()
 
 file = open('identification_langue/corpus_entrainement/french-training.txt', 'rb')
-train_english = [(Attributs_phrase (ligne,3),"fr") for ligne in file]
+train_french = [(Attributs_phrase (ligne,3),"fr") for ligne in file]
 file.close()
 
 file = open('identification_langue/corpus_entrainement/portuguese-training.txt', 'rb')
-train_espagnol = [(Attributs_phrase (ligne,3),"port") for ligne in file]
+train_portuguese = [(Attributs_phrase (ligne,3),"port") for ligne in file]
 file.close()
 
 
-trainset = train_english + train_espagnol
+trainset = train_english + train_espagnol+train_french+train_portuguese
 
 
 
