@@ -66,8 +66,6 @@ def Tranforme_texte(texte_st):
     # Converting to Lowercase
     document = str(texte_st).lower()
     doc_res = []
-    nb_mot_positif = 0
-    nb_mot_negatif = 0
     for sent in sent_tokenize(document):
         # Break the sentence into part of speech tagged tokens
         set_res = []
@@ -84,42 +82,29 @@ def Tranforme_texte(texte_st):
             if lemma is None:
                 continue
             set_res.append(lemma[0])
+            # Ajout des comptes des poids positif et negatif
             if (lemma[1].pos_score() > lemma[1].neg_score()):
-                nb_mot_positif += 1
+                set_res.append("mot_positif")
             else:
-                nb_mot_negatif += 1
+                if (lemma[1].pos_score() < lemma[1].neg_score()):
+                    set_res.append("mot_negatif")
         set_res = ' '.join(set_res)
 
         doc_res.append(set_res)
     doc_res = ' '.join(doc_res)
-    return doc_res, nb_mot_positif, nb_mot_negatif
+    return doc_res
 
 def Transform_documents(texte_doc_list):
     documents = []
     for sen in range(0, len(texte_doc_list)):
         documents.append(Tranforme_texte(texte_doc_list[sen]))
-
     return documents
-
-
-
 
 X, y = book_train.data, book_train.target
 vectorizer = CountVectorizer(min_df=4, stop_words=stopwd)
-Resultat_Normalisation = Transform_documents(X)
-New_X = [Resultat_Normalisation[i][0] for i in range(0,len(Resultat_Normalisation))]
+New_X = Transform_documents(X)
 
 X = vectorizer.fit_transform(New_X).toarray()
-
-#Ajout des comptes des poids positif et negatif
-X_new = []
-i= 0
-for k in X:
-    for j in range(0,lenX[k]):
-        X_new.append(X[k][j])
-    X_new.append(Resultat_Normalisation[i][1])
-    X_new.append(Resultat_Normalisation[i][2])
-    i +=1
 
 
 
@@ -138,9 +123,9 @@ reviews_new = ['This movie was bad', 'Absolute joy ride',
 
 
 reviews_new_counts = vectorizer.transform(Transform_documents(reviews_new))
-reviews_new_counts_X = [reviews_new_counts[i][0] for i in range(0,len(reviews_new_counts))]
-pred = clf.predict(reviews_new_counts_X)
-for review, category in zip(reviews_new_counts_X, pred):
+
+pred = clf.predict(reviews_new_counts)
+for review, category in zip(reviews_new_counts, pred):
     print('%r => %s' % (review, book_train.target_names[category]))
 print (pred)
 print(sklearn.metrics.accuracy_score(reviews_tt, pred))
