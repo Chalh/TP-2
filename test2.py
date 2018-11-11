@@ -22,7 +22,7 @@ from sklearn.model_selection import train_test_split
 from nltk.stem import PorterStemmer
 
 ps = PorterStemmer()
-bookdir = r'BookT'
+bookdir = r'Book'
 # loading all files as training data.
 book_train = load_files(bookdir, shuffle=True)
 #print(book_train.data)
@@ -125,7 +125,7 @@ reviews_new = ['This movie was bad', 'Absolute joy ride',
 reviews_new_counts = vectorizer.transform(Transform_documents(reviews_new))
 
 pred = clf.predict(reviews_new_counts)
-for review, category in zip(reviews_new_counts, pred):
+for review, category in zip(Transform_documents(reviews_new), pred):
     print('%r => %s' % (review, book_train.target_names[category]))
 print (pred)
 print(sklearn.metrics.accuracy_score(reviews_tt, pred))
