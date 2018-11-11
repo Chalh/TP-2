@@ -20,6 +20,8 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from nltk.stem import PorterStemmer
+from sklearn.linear_model import LogisticRegression
+
 
 ps = PorterStemmer()
 bookdir = r'Book'
@@ -64,9 +66,13 @@ def Tranforme_texte(texte_st):
     resultat=[]
 
     # Converting to Lowercase
-    document = str(texte_st).lower()
+    try:
+        document_tok = sent_tokenize(str(texte_st).lower())
+    except:
+        texte_st = "This is a goob bad book"
+        document_tok = sent_tokenize(str(texte_st).lower())
     doc_res = []
-    for sent in sent_tokenize(document):
+    for sent in document_tok:
         # Break the sentence into part of speech tagged tokens
         set_res = []
         for token, tag in pos_tag(word_tokenize(sent)):
@@ -112,6 +118,13 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 clf = MultinomialNB().fit(X_train, y_train)
 y_pred = clf.predict(X_test)
 print(sklearn.metrics.accuracy_score(y_test, y_pred))
+print("-------------------------------------------------")
+print("Logistic Reg")
+logreg = LogisticRegression().fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+print(sklearn.metrics.accuracy_score(y_test, y_pred))
+
+print("-------------------------------------------------")
 reviews_tt = [0,1,0,0,1,1,0,1,1,1,0,1,1]
 reviews_new = ['This movie was bad', 'Absolute joy ride',
             'Steven Seagal was terrible', 'Steven Seagal shined through.',
@@ -125,6 +138,13 @@ reviews_new = ['This movie was bad', 'Absolute joy ride',
 reviews_new_counts = vectorizer.transform(Transform_documents(reviews_new))
 
 pred = clf.predict(reviews_new_counts)
+for review, category in zip(Transform_documents(reviews_new), pred):
+    print('%r => %s' % (review, book_train.target_names[category]))
+print (pred)
+print(sklearn.metrics.accuracy_score(reviews_tt, pred))
+
+
+pred = logreg.predict(reviews_new_counts)
 for review, category in zip(Transform_documents(reviews_new), pred):
     print('%r => %s' % (review, book_train.target_names[category]))
 print (pred)
