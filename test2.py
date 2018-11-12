@@ -4,6 +4,8 @@ import sklearn
 from sklearn.datasets import load_files
 from nltk.tokenize import word_tokenize
 from nltk.corpus import sentiwordnet as swn
+
+
 #nltk.download('stopwords')
 import pickle
 from nltk.corpus import stopwords as sw
@@ -53,9 +55,12 @@ def lemmatize_texte( token, tag, normalize):
         try:
             res_negpos = swn.senti_synset(token + "." + tag + ".01")
             if normalize == 1:
-                return lemmatizer.lemmatize(ps.stem(token), tag), res_negpos
+                return lemmatizer.lemmatize(token, tag), res_negpos
             else:
-                return token, res_negpos
+                if normalize == 2:
+                    return ps.stem(token), res_negpos
+                else:
+                    return token, res_negpos
         except:
             return None
 
@@ -114,14 +119,14 @@ X = vectorizer.fit_transform(New_X).toarray()
 
 
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=0)
 clf = MultinomialNB().fit(X_train, y_train)
 y_pred = clf.predict(X_test)
 print(sklearn.metrics.accuracy_score(y_test, y_pred))
 print("-------------------------------------------------")
 print("Logistic Reg")
 logreg = LogisticRegression().fit(X_train, y_train)
-y_pred = clf.predict(X_test)
+y_pred = logreg.predict(X_test)
 print(sklearn.metrics.accuracy_score(y_test, y_pred))
 
 print("-------------------------------------------------")

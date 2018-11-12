@@ -51,23 +51,16 @@ def Reconnaitre_langue(fichier, classificateur):
     count_langue = {"en":0,"es":0,"fr":0, "pt":0}
     f = open(fichier, 'rb')
 
-    p1 = re.compile(r"\b((?!\.).)+(.)\b")
     testset=[]
-    lignes = f.readlines()
-    for ligne in lignes:
-#        if ligne is not None:
-#            if "test20.txt" in fichier:
-#                f.readlines()
-#                m1 = p1.split(ligne)
-#                print "-------------------------"
-#                if m1 is not None:
-#                    print m1.string
-#                print "-------------------------"
-#            else:
-                if ligne is not "\n":
-                    testset.append(Attributs_phrase(ligne, 3))
-
-       # testset = [Attributs_phrase(ligne, 3) for ligne in f]
+    txt_lect = [ligne for ligne in f]
+    file.close()
+    for ln in range(0, len(txt_lect), NB_LIGNES):
+        if NB_LIGNES > 1:
+            x = txt_lect[ln:ln + (NB_LIGNES - 1)]
+            x = ' '.join(x)
+        else:
+            x = txt_lect[ln]
+        testset.append(Attributs_phrase(ligne, 3))
 
     for atrb in testset:
         resultat = classificateur.classify(atrb)
@@ -78,25 +71,66 @@ def Reconnaitre_langue(fichier, classificateur):
         if count_langue[x] > nb_phrase_langue:
             langue_texte = x
             nb_phrase_langue = count_langue[x]
-    print count_langue
     return langue_texte
+
+
+NB_LIGNES=2
 
 file = open('identification_langue/corpus_entrainement/english-training.txt', 'rb')
 
-train_english = [(Attributs_phrase (ligne,3),"en") for ligne in file]
+txt_lect = [ligne for ligne in file]
 file.close()
+train_english=[]
+for ln in range(0,len(txt_lect),NB_LIGNES):
+    if NB_LIGNES >1:
+        x= txt_lect[ln:ln+(NB_LIGNES-1)]
+        x=' '.join(x)
+    else:
+        x = txt_lect[ln]
+    train_english.append((Attributs_phrase(x, 3), "en"))
+
+
+
+
+
 
 file = open('identification_langue/corpus_entrainement/espanol-training.txt', 'rb')
-train_espagnol = [(Attributs_phrase (ligne,3),"es") for ligne in file]
+
+txt_lect = [ligne for ligne in file]
 file.close()
+train_espagnol=[]
+for ln in range(0,len(txt_lect),NB_LIGNES):
+    if NB_LIGNES >1:
+        x= txt_lect[ln:ln+(NB_LIGNES-1)]
+        x=' '.join(x)
+    else:
+        x = txt_lect[ln]
+    train_espagnol.append((Attributs_phrase(x, 3), "es"))
+
 
 file = open('identification_langue/corpus_entrainement/french-training.txt', 'rb')
-train_french = [(Attributs_phrase (ligne,3),"fr") for ligne in file]
+txt_lect = [ligne for ligne in file]
 file.close()
+train_french=[]
+for ln in range(0,len(txt_lect),NB_LIGNES):
+    if NB_LIGNES >1:
+        x= txt_lect[ln:ln+(NB_LIGNES-1)]
+        x=' '.join(x)
+    else:
+        x = txt_lect[ln]
+    train_french.append((Attributs_phrase(x, 3), "fr"))
 
 file = open('identification_langue/corpus_entrainement/portuguese-training.txt', 'rb')
-train_portuguese = [(Attributs_phrase (ligne,3),"pt") for ligne in file]
+txt_lect = [ligne for ligne in file]
 file.close()
+train_portuguese=[]
+for ln in range(0,len(txt_lect),NB_LIGNES):
+    if NB_LIGNES >1:
+        x= txt_lect[ln:ln+(NB_LIGNES-1)]
+        x=' '.join(x)
+    else:
+        x = txt_lect[ln]
+    train_portuguese.append((Attributs_phrase(x, 3), "pt"))
 
 
 trainset = train_english + train_espagnol+train_french+train_portuguese
@@ -113,20 +147,29 @@ rep_test = "identification_langue/corpus_test1/"
 p1 = re.compile(r'.*(fr|en|es|pt)\.txt')
 
 testset=[]
+accuracy = 0
 for fabc in os.listdir(rep_test):
     m1 = p1.search(fabc)
     if m1 is not None:
         file = open(rep_test+fabc, 'rb')
-        for ligne in file:
-            testset.append((Attributs_phrase(ligne, 3), m1.group(1)))
+        txt_lect = [ligne for ligne in file]
+        file.close()
+        for ln in range(0, len(txt_lect), NB_LIGNES):
+            if NB_LIGNES > 1:
+                x = txt_lect[ln:ln + (NB_LIGNES - 1)]
+                x = ' '.join(x)
+            else:
+                x = txt_lect[ln]
+            testset.append((Attributs_phrase(x, 3), m1.group(1)))
+
+        if Reconnaitre_langue(rep_test + fabc, classifier) == m1.group(1):
+            accuracy +=1
 
 print nltk.classify.util.accuracy(classifier, testset)
-#for fabc in os.listdir(rep_test):
-#    print str(fabc) + "::" + Reconnaitre_langue(rep_test+fabc, classifier)
+
+print float(accuracy)
 
 classifier.show_most_informative_features()
 
 
-
-freq_dist_trigrame = False
 
